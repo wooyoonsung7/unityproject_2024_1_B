@@ -7,18 +7,27 @@ public class CircleObject : MonoBehaviour
     public bool isDrag;                     //드래그 중인지 판단하는 (bool)
     public bool isUsed;                    //사용 완료 판단하는 (bool)
     Rigidbody2D rigidbody2D;        //2D 강체를 불러온다.
+
+    public int index;                         //과일 번호를 만든다.
+
+    void Awake()                                                                         //시작하기전 소스 단계에서부터 셋팅
+    {
+        isUsed = false;                                                                 //사용 완료가 되지 않음 (처움 사용)
+        rigidbody2D = GetComponent<Rigidbody2D>();             //강체를 가져온다.
+        rigidbody2D.simulated = false;                                        //생성될때는 시뮬레이팅 되지 않는다.
+    }
     void Start()
     {
-        isUsed = false;                                                             //사용 완료가 되지 않음 (처음 사용)
-        rigidbody2D = GetComponent<Rigidbody2D>();          //강체를 가져온다.
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (isUsed) return;                                                         //사용완료된 물체를 더이상 업데이트 하기 않기 위해서 return 로 돌려 준다.
+        if (isUsed)                                                        //사용완료된 물체를 더이상 업데이트 하기 않기 위해서 return 로 돌려 준다.
+        return;
 
-        if(isDrag)
+        if (isDrag)
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition );        //화면에서 -> 월드 포지션 위치 찾아주는 함수 사용
             float leftBorrder = -4.5f + transform.localScale.x / 2f;                                                    //최대 왼쪽으로 갈 수 있는 범위
@@ -54,4 +63,40 @@ public class CircleObject : MonoBehaviour
             Temp.gameObject.GetComponent<GameManger>() .GenObject();
         }
     }
+
+
+    public void Used()
+    {
+        isDrag = false;                             //드래그가 종료
+        isUsed = true;                             //사용이 완료
+        rigidbody2D.simulated = true;    //물리 현상 시작
+    }
+
+    public void OnCollisionEnter2D(Collision2D collision)                   //2D 충돌이 일어날 경우
+    {
+        if (index >= 7)                                                                             //준비된 과일 7개
+            return;                                                                                     
+
+        if (collision.gameObject.tag == "Fruit")                                        //충돌 물체의 TAG 가 Furit 일 경우
+        {
+            CircleObject temp = collision.gameObject.GetComponent<CircleObject>(); //임시로 Class temp를 선언하고 충돌체의 Class(CircleObject)를 받아온다
+             
+            if(temp.index == index)
+            {
+                if(gameObject.GetInstanceID() > collision.gameObject.GetInstanceID())                  //유니티에서 지원하는 고유의 ID를 받아와서 ID가 다음 과일 생성
+                {
+                    // GameManger 에서 생성함수 호출 
+                    GameObject Temp = GameObject.FindWithTag("GameManager");
+                    if (Temp != null)
+                    {
+                        Temp.gameObject.GetComponent<GameManger>().MergedObject(index, gameObject.transform.position);
+                    }
+                    Destroy(temp.gameObject);                                   //충돌 물체 파괴
+                    Destroy(gameObject);                                           //자기 자신 파괴
+                }
+            }
+        }
+    }
+
+
 }
