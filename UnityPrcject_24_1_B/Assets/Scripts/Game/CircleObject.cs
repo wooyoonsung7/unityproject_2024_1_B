@@ -9,16 +9,22 @@ public class CircleObject : MonoBehaviour
     Rigidbody2D rigidbody2D;        //2D 강체를 불러온다.
 
     public int index;                         //과일 번호를 만든다.
+    
+    public float EndTime = 0.0f;                            //종료 선 ㅣ간 체크 변수 (float)
+    public SpriteRenderer spriteRenderer;           //종료시 스프라이트 색을 변환 시키기 위해 접근 선언
+
+    public GameManger gameManager;              //GameManager 접근 선언
 
     void Awake()                                                                         //시작하기전 소스 단계에서부터 셋팅
     {
         isUsed = false;                                                                 //사용 완료가 되지 않음 (처움 사용)
         rigidbody2D = GetComponent<Rigidbody2D>();             //강체를 가져온다.
         rigidbody2D.simulated = false;                                        //생성될때는 시뮬레이팅 되지 않는다.
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
     void Start()
     {
-        
+        gameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManger>();
     }
 
     // Update is called once per frame
@@ -70,6 +76,32 @@ public class CircleObject : MonoBehaviour
         isDrag = false;                             //드래그가 종료
         isUsed = true;                             //사용이 완료
         rigidbody2D.simulated = true;    //물리 현상 시작
+    }
+
+    public void OnTriggerStay2D(Collider2D collision)              //Trigger 충돌 중일 때
+    {
+        if(collision.tag == "EndLine")                                              //충돌중인 물체가의 TAG 가 EndLine 일 경우 
+        {
+            EndTime += Time.deltaTime;                                          //프레임시작만큼 누적 시켜서 초를 만든다.
+
+            if (EndTime > 1)                                                              //충돌진행이 1초 되었을 경우
+            {
+                spriteRenderer.color = new Color(0.9f, 0.2f, 0.2f);     //빨강색 처리
+            }
+            if(EndTime > 3)
+            {
+                gameManager.EndGame();
+            }
+        }
+    }
+
+    public void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.tag == "EndLine")                                                     //충돌 물체가 빠져 나갔을때
+        {
+            EndTime = 0.0f;
+            spriteRenderer.color = Color.white;                                      //기존 색상으로 변경
+        }
     }
 
     public void OnCollisionEnter2D(Collision2D collision)                   //2D 충돌이 일어날 경우
