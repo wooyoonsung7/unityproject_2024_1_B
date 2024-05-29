@@ -33,7 +33,7 @@ public class GameManger : MonoBehaviour
             {
                 int RandNumber =  UnityEngine.Random.Range(0, 3);                       // 0 ~ 2 까지 의 랜덤 숫자를 생성
                 GameObject Temp = Instantiate(CircleObject[RandNumber]);            //과일플리팹 오브젝트를 생성 시켜준다. (Instantiste)
-                Temp. transform.position = GenTransform.position;             //설정한 위치로 이동 시킨다
+                Temp.transform.position = GenTransform.position;             //설정한 위치로 이동 시킨다
                 isGen = true;                                                           //Gen이 되었다고 ture로bool 값을 변경한다.
             }
         }
@@ -61,8 +61,8 @@ public class GameManger : MonoBehaviour
         if(Point > BestScore)                                                           //포인트와 비교한다.
         {
             BestScore = Point;
-            PlayerPrefs.SetInt("BestScore", Point);                         //포인트가 더 클경우 저장한다.
-            OnBestScoreChanged?.Invoke(Point);
+            PlayerPrefs.SetInt("BestScore", BestScore);                         //포인트가 더 클경우 저장한다.
+            OnBestScoreChanged?.Invoke(BestScore);
         }
     }
 }
